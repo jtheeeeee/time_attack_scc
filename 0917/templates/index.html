@@ -1,0 +1,286 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+          integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"
+            integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+            crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
+            integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+            crossorigin="anonymous"></script>
+
+    <title>주식 종목 추천</title>
+    <script src="https://cdn.jsdelivr.net/npm/bs-custom-file-input/dist/bs-custom-file-input.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nanum+Myeongjo:wght@700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            font-family: 'Nanum Myeongjo', serif;
+        }
+        .jumbotron{
+            width:900px;
+            margin: auto;
+        }
+        .rec-content{
+            margin-left: 25px;
+        }
+
+
+
+    </style>
+    <script>
+        let doc={}
+        $(document).ready(function () {
+            $.ajax({
+                type: "GET",
+                url: '/base/codes',
+                data: {},
+                success: function (response) {
+                    group=response
+                }
+            })
+
+        })
+
+        function codes(group_name){
+            $.ajax({
+                type: "GET",
+                async: false,
+                url: '/codes?group='+group_name,
+                data: {},
+                success: function (response) {
+                    result=response
+                }
+            })
+            return result
+        }
+
+        function info_result(doc){
+            let market=doc['market']
+            let sector=doc['sector']
+            let tag =doc['tag']
+            $.ajax({
+                type: "POST",
+                url: '/result',
+                data: {market:market, sector:sector, tag:tag},
+                success: function (response) {
+                    alert('ok')
+                }
+            })
+        }
+
+
+        function rec_start(){
+            if ($('#market').css("display")=="none"){
+                for (let i =0; i<codes(group[0]).length; i++){
+                    let code=codes(group[0])[i]['code']
+                    let name =codes(group[0])[i]['name']
+                    let temp_html=`
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="exampleRadios" id="exampleRadios1"
+                                               value="${code}" name="${group[0]}" checked>
+                                        <label class="form-check-label" for="exampleRadios1">
+                                            ${name}
+                                        </label>
+                                    </div>
+                    `
+                    $('#market #market-radio').append(temp_html)
+                }
+                $('#market').show()
+                $('#start_btn').hide()
+            }
+        }
+        function next(){
+            if ($('#market').css("display")=="block"){
+
+                let market=$('input:checked').val();
+                $('#market').hide()
+                doc[group[0]] = market
+                for (let i =0; i<codes(group[1]).length; i++){
+                    let code=codes(group[1])[i]['code']
+                    let name =codes(group[1])[i]['name']
+                    let temp_html=`
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="exampleRadios" id="exampleRadios1"
+                                               value="${code}" name="${group[1]}" checked>
+                                        <label class="form-check-label" for="exampleRadios1">
+                                            ${name}
+                                        </label>
+                                    </div>
+                    `
+                    $('#sector #sector-radio').append(temp_html)
+                }
+                $('#sector').show()
+            } else if ($('#sector').css("display")=="block") {
+
+                let sector=$('input:checked').val();
+                doc[group[1]] = sector
+                console.log(doc)
+                $('#sector').hide()
+                for (let i =0; i<codes(group[2]).length; i++){
+                    let code=codes(group[2])[i]['code']
+                    let name =codes(group[2])[i]['name']
+                    let temp_html=`
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="exampleRadios" id="exampleRadios1"
+                                               value="${code}" name="${group[2]}" checked>
+                                        <label class="form-check-label" for="exampleRadios1">
+                                            ${name}
+                                        </label>
+                                    </div>
+                    `
+                    $('#tag #tag-radio').append(temp_html)
+                }
+                $('#tag').show()
+            } else if($('#tag').css("display")=="block"){
+                let tag=$('input:checked').val();
+                doc[group[2]] = tag
+                alert('iamhere')
+                $('#tag').hide()
+                info_result(doc)
+                $('#result').show()
+                $('#refresh').show()
+            } else{
+                $('#result').hide()
+                $('#refresh').hide()
+                $('#tag #tag-radio').empty()
+                $('#market #market-radio').empty()
+                $('#sector #sector-radio').empty()
+                $('#start_btn').show()
+            }
+        }
+        function stock_market(){
+            $.ajax({
+                type: "POST",
+                url: '/stock',
+                data: {'group':'market'},
+                success: function (response) {
+                    console.log('market')
+                }
+            })
+        }
+
+        function info_alert(){
+            alert("info")
+        }
+
+    </script>
+</head>
+
+<body>
+<div class="wrap">
+    <div class="jumbotron">
+        <h1 class="display-4">주식 종목 추천!!</h1>
+        <p class="lead">원하시는 종목을 추천합니다.</p>
+        <hr class="my-4">
+        <div  class = "start-button" id="start-button">
+            <a class="btn btn-primary btn-lg" id="start_btn" href="#" role="button" onclick="rec_start()">추천시작</a>
+        </div>
+        <div class="market" id="market" style="display:none"  value="market">
+            <div class="radio" id="market-radio">
+<!--                <div class="form-check">-->
+<!--                    <input class="form-check-input" type="radio" name="exampleRadios" id="exampleRadios1"-->
+<!--                           value="option1" checked>-->
+<!--                    <label class="form-check-label" for="exampleRadios1">-->
+<!--                        코스피-->
+<!--                    </label>-->
+<!--                </div>-->
+<!--                <div class="form-check">-->
+<!--                    <input class="form-check-input" type="radio" name="exampleRadios" id="exampleRadios2"-->
+<!--                           value="option2">-->
+<!--                    <label class="form-check-label" for="exampleRadios2">-->
+<!--                        코스닥-->
+<!--                    </label>-->
+<!--                </div>-->
+            </div>
+            <button type="button" class="btn btn-success" id="next-market" onclick="next()">다음</button>
+        </div>
+        <div class="sector" id="sector" style="display:none">
+            <div class="radio" id ="sector-radio">
+<!--                <div class="form-check">-->
+<!--                    <input class="form-check-input" type="radio" name="exampleRadios" id="exampleRadios1"-->
+<!--                           value="option1"-->
+<!--                           checked>-->
+<!--                    <label class="form-check-label" for="exampleRadios1">-->
+<!--                        반도체와반도체장비-->
+<!--                    </label>-->
+<!--                </div>-->
+<!--                <div class="form-check">-->
+<!--                    <input class="form-check-input" type="radio" name="exampleRadios" id="exampleRadios2"-->
+<!--                           value="option2">-->
+<!--                    <label class="form-check-label" for="exampleRadios2">-->
+<!--                        양방향미디어와서비스-->
+<!--                    </label>-->
+<!--                </div>-->
+<!--                <div class="form-check">-->
+<!--                    <input class="form-check-input" type="radio" name="exampleRadios" id="exampleRadios2"-->
+<!--                           value="option2">-->
+<!--                    <label class="form-check-label" for="exampleRadios2">-->
+<!--                        자동차-->
+<!--                    </label>-->
+<!--                </div>-->
+            </div>
+            <button type="button" class="btn btn-success" id="next-sector" onclick="next()">다음</button>
+        </div>
+        <div class="tag" id="tag" style="display:none">
+            <div class="radio" id ="tag-radio">
+<!--                <div class="form-check">-->
+<!--                    <input class="form-check-input" type="radio" name="exampleRadios" id="exampleRadios1"-->
+<!--                           value="option1"-->
+<!--                           checked>-->
+<!--                    <label class="form-check-label" for="exampleRadios1">-->
+<!--                        메모리-->
+<!--                    </label>-->
+<!--                </div>-->
+<!--                <div class="form-check">-->
+<!--                    <input class="form-check-input" type="radio" name="exampleRadios" id="exampleRadios2"-->
+<!--                           value="option2">-->
+<!--                    <label class="form-check-label" for="exampleRadios2">-->
+<!--                        플랫폼-->
+<!--                    </label>-->
+<!--                </div>-->
+<!--                <div class="form-check">-->
+<!--                    <input class="form-check-input" type="radio" name="exampleRadios" id="exampleRadios2"-->
+<!--                           value="option2">-->
+<!--                    <label class="form-check-label" for="exampleRadios2">-->
+<!--                        전기차-->
+<!--                    </label>-->
+<!--                </div>-->
+            </div>
+            <button type="button" class="btn btn-success" id="next-tag" onclick="next()">다음</button>
+        </div>
+        <div class ="result" id="result" type="button" class="btn btn-info" style="display:none">
+            <div class="rec-content">
+                <div>삼성전자
+                    <button type="button" class="btn btn-info" onclick="info_alert()">정보</button>
+                </div>
+                <div>SK하이닉스
+                    <button type="button" class="btn btn-info" onclick="info_alert()">정보</button>
+                </div>
+                <div>DB하이텍
+                    <button type="button" class="btn btn-info" onclick="info_alert()">정보</button></div>
+            </div>
+            <div><button type="button" id="refresh" class="btn btn-secondary" onclick="next()">다시 추천</button></div>
+        </div>
+    </div>
+</div>
+<div class="test" id="test">
+
+
+</div>
+
+</body>
+
+</html>
