@@ -10,5 +10,6 @@ import lombok.NoArgsConstructor;
 @Getter
 public class MemoRequestDto {
     private String content;
+    private String title;
 
 }

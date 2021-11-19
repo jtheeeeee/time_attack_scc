@@ -5,6 +5,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.sql.SQLException;
 
-public interface MemoRepository extends JpaRepository {
+public interface MemoRepository extends JpaRepository<Memo, Long> {
 
 }

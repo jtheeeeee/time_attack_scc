@@ -3,27 +3,22 @@ package com.example.timeattack1112.controller;
 import com.example.timeattack1112.domain.Memo;
 import com.example.timeattack1112.dto.MemoRequestDto;
 import com.example.timeattack1112.service.MemoService;
+import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@RequiredArgsConstructor
 @RestController
 public class MemoController {
 
     private final MemoService memoService;
 
-    @Autowired
-    public MemoController(MemoService memoService){
-        this.memoService=memoService;
-    }
-
-    @GetMapping("/api/memos")
-    public List<Memo> getMemos(){
-        return memoService.getMemos();
+    @GetMapping("/api/memos/{id}")
+    public Memo getMemos(@PathVariable Long id){
+        return memoService.getMemos(id);
     }
 
     @PostMapping("/api/memos")

@@ -19,10 +19,11 @@ public class Memo extends Timestamped {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
+
+    @Column(nullable = false)
+    private String title;
+
     @Column(nullable = false)
     private String content;
 
-    public Memo(MemoRequestDto requestDto) {
-        this.content=requestDto.getContent();
-    }
 }

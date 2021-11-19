@@ -19,13 +19,14 @@ public class MemoService {
         this.memoRepository=memoRepository;
     }
 
-    public List<Memo> getMemos(){
-        return memoRepository.findAll();
+    public Memo getMemos(Long id){
+        return memoRepository.findById(id).get();
     }
 
     @Transactional
     public Memo createMemo(MemoRequestDto requestDto){
-        Memo memo = new Memo(requestDto);
+        Memo memo = new Memo();
+        memo.setContent(requestDto.getContent());
         memoRepository.save(memo);
         return memo;
     }
